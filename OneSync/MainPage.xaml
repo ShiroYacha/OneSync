@@ -1,0 +1,28 @@
+﻿<Page
+    x:Class="OneSync.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OneSync"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel>
+            <TextBlock Name="OnedriveTextBlock" TextWrapping="Wrap"/>
+            <TextBox Name="NewBlogUrl"></TextBox>
+            <Button Name="Add"  Click="Add_Click">Add</Button>
+            <Button Name="Remove"  Click="Remove_Click">Remove</Button>
+            <ListView Name="Blogs" SelectionMode="Multiple">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Url}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button Name="Upload" Click="Upload_Click">Upload</Button>
+            <Button Name="Download" Click="Download_Click">Download</Button>
+        </StackPanel>
+    </Grid>
+</Page>
