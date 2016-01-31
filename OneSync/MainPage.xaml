@@ -23,6 +23,8 @@
             </ListView>
             <Button Name="Upload" Click="Upload_Click">Upload</Button>
             <Button Name="Download" Click="Download_Click">Download</Button>
+            <Button Name="Initialize" Click="Initialize_Click">Initialize</Button>
+            <Button Name="InitializeAll" Click="InitializeAll_Click">Initialize All</Button>
         </StackPanel>
     </Grid>
 </Page>

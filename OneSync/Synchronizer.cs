@@ -18,22 +18,43 @@ namespace OneSync
 {
     public class Synchronizer
     {
+        private object loggingModeLock = new object();
+        private bool loggingMode;
+        public bool LoggingMode
+        {
+            get
+            {
+                return loggingMode;
+            }
+            set
+            {
+                lock(loggingModeLock)
+                {
+                    loggingMode = value;
+                }
+            }
+        }
+
         private IOneDriveClient client;
         private AccountSession session;
         private string text = "";
-        private string executedText = "";
 
         private const string SYMBOL_commandSeparator = "$$$";
         private const string SYMBOL_parametersSeparator = "~";
         private const string SYMBOL_paramSeparator = ",";
         private const string SYMBOL_paramKeyValueSeparator = ":";
 
-        public async Task Initialize()
+        public async Task Setup()
         {
             // onedrive
             var scopes = new string[] { "wl.basic", "wl.signin", "onedrive.readwrite" };
             client = OneDriveClientExtensions.GetUniversalClient(scopes);
             session = await client.AuthenticateAsync();
+        }
+
+        public async Task InitializeOnedrive()
+        {
+            await PutOnedrive("");
         }
 
         public async Task UpdateOnedrive()
@@ -153,7 +174,7 @@ namespace OneSync
                     foreach(var parameter in parameterParts)
                     {
                         var kvp = parameter.Split(new string[] { SYMBOL_paramKeyValueSeparator }, StringSplitOptions.None);
-                        parameters.Add(int.Parse(kvp[1])); // hack: quick test with int
+                        parameters.Add(kvp[1]); // hack: quick test with string
                     }
                 }
                 command.Parameters = parameters.ToArray();
@@ -180,23 +201,35 @@ namespace OneSync
 
         public void Update(object data)
         {
-            var logData = data as DbCommandLogData;
-            if (logData != null)
+            if (loggingMode)
             {
-                var parameters = "";
-                foreach (var p in logData.Parameters)
+                var logData = data as DbCommandLogData;
+                if (logData != null)
                 {
-                    parameters += $"{p.Key}{SYMBOL_paramKeyValueSeparator}{p.Value}{SYMBOL_paramSeparator}";
-                }
+                    var parameters = "";
+                    foreach (var p in logData.Parameters)
+                    {
+                        parameters += $"{p.Key}{SYMBOL_paramKeyValueSeparator}{p.Value}{SYMBOL_paramSeparator}";
+                    }
 
-                var newLine = $"{logData.CommandText}{SYMBOL_parametersSeparator}{parameters}{SYMBOL_commandSeparator}";
-                text += Environment.NewLine + newLine;
+                    var newLine = $"{logData.CommandText}{SYMBOL_parametersSeparator}{parameters}{SYMBOL_commandSeparator}";
+                    text += Environment.NewLine + newLine;
+                }
             }
         }
 
         public async void ShutDown()
         {
             await client.SignOutAsync();
+        }
+
+        public async Task InitializeDb(BloggingContext db)
+        {
+            foreach(var blog in db.Blogs)
+            {
+                db.Blogs.Remove(blog);
+            }
+            await db.SaveChangesAsync();
         }
     }
 

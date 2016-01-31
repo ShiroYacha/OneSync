@@ -29,7 +29,7 @@ namespace OneSync
         {
             optionsBuilder.UseSqlite($"Filename=Blogging.db");
             optionsBuilder.EnableSensitiveDataLogging();
-        }
+       }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
